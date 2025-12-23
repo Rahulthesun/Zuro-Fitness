@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/wallet_screen.dart';
@@ -25,12 +26,16 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
+
+  
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final _storage = const FlutterSecureStorage();
+
   Screen _currentScreen = Screen.home;
-  bool _isLoggedIn = true;
+  bool _isLoggedIn = false;
   int _credits = 72;
   int _pendingCreditPurchase = 0;
   
@@ -127,34 +132,25 @@ class _MainScreenState extends State<MainScreen> {
 final List<CreditPackage> _creditPackages = [
   CreditPackage(
     id: '1',
-    baseCredits: 50,
-    bonusCredits: 5,
-    price: 45.0,
-    pricePerCredit: 0.90,
+    credits: 100,
+    price: 100,          // no discount
+    discountPercent: 0,
   ),
   CreditPackage(
     id: '2',
-    baseCredits: 100,
-    bonusCredits: 15,
-    price: 85.0,
-    pricePerCredit: 0.74,
+    credits: 500,
+    price: 487.5,        // 2.5% discount
+    discountPercent: 2.5,
     isPopular: true,
   ),
   CreditPackage(
     id: '3',
-    baseCredits: 200,
-    bonusCredits: 40,
-    price: 160.0,
-    pricePerCredit: 0.67,
-  ),
-  CreditPackage(
-    id: '4',
-    baseCredits: 500,
-    bonusCredits: 100,
-    price: 375.0,
-    pricePerCredit: 0.63,
+    credits: 1000,
+    price: 950,          // 5% discount
+    discountPercent: 5,
   ),
 ];
+
 
   void _handleLogin() {
     setState(() {
@@ -180,7 +176,7 @@ final List<CreditPackage> _creditPackages = [
 
   void _handleBuyCredits(CreditPackage package) {
     setState(() {
-      _pendingCreditPurchase = package.totalCredits;
+      _pendingCreditPurchase = package.credits;
       _currentScreen = Screen.payment;
     });
   }
@@ -276,7 +272,7 @@ final List<CreditPackage> _creditPackages = [
       case Screen.wallet:
         return WalletScreen(
           onBack: _handleBack,
-          credits: _credits,
+          walletBalance: _credits,
           onBuyCredits: _handleBuyCredits,
           creditPackages: _creditPackages,
           accentColor: _accentColor,

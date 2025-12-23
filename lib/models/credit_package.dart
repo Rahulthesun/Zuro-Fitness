@@ -1,19 +1,17 @@
 class CreditPackage {
   final String id;
-  final int baseCredits;
-  final int bonusCredits;
+  final int credits;
   final double price;
-  final double pricePerCredit;
+  final double discountPercent;
   final bool isPopular;
 
   CreditPackage({
     required this.id,
-    required this.baseCredits,
-    required this.bonusCredits,
+    required this.credits,
     required this.price,
-    required this.pricePerCredit,
+    required this.discountPercent,
     this.isPopular = false,
   });
 
-  int get totalCredits => baseCredits + bonusCredits;
+  double get pricePerCredit => price / credits;
 }
