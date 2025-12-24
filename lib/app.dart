@@ -34,7 +34,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final _storage = const FlutterSecureStorage();
 
-  Screen _currentScreen = Screen.home;
+  Screen _currentScreen = Screen.login;
   bool _isLoggedIn = false;
   int _credits = 72;
   int _pendingCreditPurchase = 0;

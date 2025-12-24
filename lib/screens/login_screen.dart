@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onLogin;
@@ -10,7 +12,15 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+
+
+
+
 class _LoginScreenState extends State<LoginScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? _verificationId;
+  int? _resendToken;
+
   bool _isOtpSent = false;
   bool _isLoading = false;
   final TextEditingController _phoneController = TextEditingController();
@@ -36,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return otp.length == 6 && RegExp(r'^\d{6}$').hasMatch(otp);
   }
 
-  void _handleSendOtp() async {
+  void _handleSendOtp({int? forceResendingToken}) async {
     final phone = _phoneController.text.trim();
     
     if (phone.isEmpty) {
@@ -58,16 +68,37 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _isLoading = false;
-      _isOtpSent = true;
-    });
-
-    // In a real app, you would call an API to send OTP
-    // Example: await authService.sendOtp('+91$phone');
+    await _auth.verifyPhoneNumber(
+      phoneNumber: '+91$phone',
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        // Auto-retrieve verification code on Android
+        await _auth.signInWithCredential(credential);
+        widget.onLogin();
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        setState(() {
+          _isLoading = false;
+          _phoneError = e.message;
+        });
+        print(e.message);
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        setState(() {
+          _verificationId = verificationId;
+          _resendToken = resendToken;
+          _isOtpSent = true;
+          _isLoading = false;
+        });
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        setState(() {
+          _verificationId = verificationId;
+          _isLoading = false;
+        });
+      },
+      timeout: const Duration(seconds: 60),
+      forceResendingToken: _resendToken,
+    );
   }
 
   void _handleVerifyOtp() async {
@@ -92,17 +123,20 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    // In a real app, you would verify OTP with backend
-    // Example: await authService.verifyOtp('+91${_phoneController.text.trim()}', otp);
-    
-    widget.onLogin();
+    try {
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId!,
+        smsCode: otp,
+      );
+      await _auth.signInWithCredential(credential);
+      widget.onLogin();
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _otpError = e.message;
+        _isLoading = false;
+      });
+      print(e.message);
+    }
   }
 
   void _handleResendOtp() {
@@ -111,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _otpError = null;
       _isOtpSent = false;
     });
-    _handleSendOtp();
+    _handleSendOtp(forceResendingToken: _resendToken);
   }
 
   @override

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "264285638482",
+    "project_id": "zuro-a3cd2",
+    "storage_bucket": "zuro-a3cd2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264285638482:android:07604805a1fd8c4471b48b",
+        "android_client_info": {
+          "package_name": "com.example.zuro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd3DS32iPmD38ezZvwxn9jjrLCvuZe3B8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
